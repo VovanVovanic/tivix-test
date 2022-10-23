@@ -83,9 +83,22 @@ const getSet = (arr, data, key)=>{
 
 export const getMyBudgets = async (req, res) => {
  try {
+  let page
+
+  if (req.query.page) {
+   page = parseInt(req.query.page);
+  }
+  else {
+   page = 1
+  }
+  const limit = 2;
+  const skip = (page - 1) * limit;
+
+  const total = await BudgetSchema.countDocuments({})
+  
   const user = await UserSchema.findById(req.userId)
   const username = user.nickname
-  const budgets = await BudgetSchema.find({ creator: username })
+  const budgets = await BudgetSchema.find({ creator: username }).skip(skip).limit(limit)
   const users = await BudgetSchema.find({}, "creator")
 
   const set = new Set(users.map((el) => el.creator))
@@ -99,7 +112,8 @@ export const getMyBudgets = async (req, res) => {
    iShareTo: [...getSet(budgets, 'share_with', "name")],
    categories: {
    expenses, incomes
-   }
+   },
+   total
   })
  }
  catch (err) {
@@ -112,12 +126,33 @@ export const getMyBudgets = async (req, res) => {
 
 export const filterMyBudgets = async (req, res) => {
  try {
+  let page
+
+  if (req.query.page) {
+   page = parseInt(req.query.page);
+  }
+  else {
+   page = 1
+  }
+  const limit = 2;
+  const skip = (page - 1) * limit
+
   const expenses = req.body.expenses 
   const incomes = req.body.incomes
   const users = req.body.users
   const creatorKey = users && "creator"
   const expensesKey = expenses && "expenses"
   const incomesKey = incomes && "incomes"
+
+  const total = await BudgetSchema.countDocuments({
+   [creatorKey]: { $in: users },
+   [expensesKey]: {
+   $elemMatch:{ category: { $in: expenses} }
+   },
+   [incomesKey]: {
+    $elemMatch:{ category: { $in: incomes } }
+     }
+  })
 
   const budgets = await BudgetSchema.find(
    {
@@ -129,9 +164,9 @@ export const filterMyBudgets = async (req, res) => {
      $elemMatch:{ category: { $in: incomes } }
       }
     
-   })
-
-  return res.json({data: budgets})
+   }).skip(skip).limit(limit)
+  
+  return res.json({data: budgets, total})
  }
  catch (e) {
   res.status(404).json({
@@ -206,9 +241,29 @@ export const updateBudget = async (req, res) => {
 export const getFriendBudgets = async (req, res) => {
  
  try {
+  let page
+
+  if (req.query.page) {
+   page = parseInt(req.query.page);
+  }
+  else {
+   page = 1
+  }
+  const limit = 2;
+  const skip = (page - 1) * limit
+
   
   const user = await UserSchema.findById(req.userId)
   const username = user.nickname
+
+  const total = await BudgetSchema.countDocuments({
+   creator: req.body.creator,
+   "share_with": {
+    $elemMatch: {
+     name: username
+    }
+   }
+  })
 
   const budgets = await BudgetSchema.find({
    creator: req.body.creator,
@@ -217,7 +272,7 @@ export const getFriendBudgets = async (req, res) => {
      name: username
     }
    }
-  })
+  }).skip(skip).limit(limit)
 
   budgets.forEach((el) => {
   
@@ -234,7 +289,7 @@ export const getFriendBudgets = async (req, res) => {
    }).filter((f) => f.share_with.some((s) => s.name === username))
   })
 
-  return res.json({data: budgets})
+  return res.json({data: budgets, total})
  }
  catch (e) {
   res.status(404).json({

@@ -38,9 +38,6 @@ async function start() {
     app.get('/budgets/friend_budget', checkAuth, budget.getFriendBudgets)
     
 
-    ///paging
-
-
     app.listen(PORT, () => {
       console.log("server started")
     })
