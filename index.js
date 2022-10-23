@@ -30,7 +30,8 @@ async function start() {
 
 ///budget
   app.post('/budgets/create_budget', checkAuth, budget.createBudget);
-  app.get('/budgets/get_shared_with_me', checkAuth, budget.getShared);
+   app.get('/budgets/get_shared_with_me', checkAuth, budget.getShared);
+   app.delete('/budgets/remove/:id', checkAuth, budget.removeBudget);
   
   app.listen(PORT, () => {
    console.log("server started")

@@ -40,7 +40,7 @@ export const getShared = async (req, res) => {
    }
   }
   )
-console.log(username, "name")
+
   sharedBudgets.forEach((el) => {
    el.expenses = el.expenses.filter((e) => {
     if (e.share_with.length) {
@@ -60,5 +60,40 @@ console.log(username, "name")
  }
  catch (e) {
   res.json({ e })
+ }
+}
+
+export const removeBudget = async (req, res) => {
+ try {
+  const Id = req.params.id.slice(1);
+
+  BudgetSchema.findOneAndDelete(
+   {
+    _id: Id,
+   },
+   (err, doc) => {
+    if (err) {
+     console.log(err);
+     return res.status(500).json({
+      message: 'Could not delete the budget',
+     });
+    }
+
+    if (!doc) {
+     return res.status(404).json({
+      message: 'The budget is not found',
+     });
+    }
+
+    res.json({
+     success: true,
+    });
+   },
+  );
+ } catch (err) {
+  console.log(err);
+  res.status(500).json({
+   message: 'Could not get budgets',
+  });
  }
 }
