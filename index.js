@@ -4,6 +4,7 @@ import { registerValidation, loginValidation } from './src/validations/validator
 import{checkAuth} from './src/middlwares/auth.js'
 import cors from 'cors'
 import * as user from './src/routes/user.js';
+import * as budget from './src/routes/budget.js';
 
 const app = express()
 app.use(express.json())
@@ -28,6 +29,8 @@ async function start() {
   app.delete('/user/remove', checkAuth, user.remove)
 
 ///budget
+  app.post('/budgets/create_budget', checkAuth, budget.createBudget);
+  app.get('/budgets/get_shared_with_me', checkAuth, budget.getShared);
   
   app.listen(PORT, () => {
    console.log("server started")
