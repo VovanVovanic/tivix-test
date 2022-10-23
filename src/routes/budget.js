@@ -3,6 +3,8 @@ import BudgetSchema from '../schemas/Budget.js'
 import { validationResult } from 'express-validator'
 
 
+
+
 export const createBudget = async (req, res) => {
  try {
   const errors = validationResult(req)
@@ -26,41 +28,6 @@ export const createBudget = async (req, res) => {
   })
 
   return res.json(newBudget)
-
- }
- catch (e) {
-  res.json({ e })
- }
-}
-
-export const getShared = async (req, res) => {
- try {
-  const user = await UserSchema.findById(req.userId)
-  const username = user.nickname
-  const sharedBudgets = await BudgetSchema.find({
-   "share_with": {
-    $elemMatch: {
-     name: username
-    }
-   }
-  }
-  )
-
-  sharedBudgets.forEach((el) => {
-   el.expenses = el.expenses.filter((e) => {
-    if (e.share_with.length) {
-     return { ...e }
-    }
-   }).filter((f) => f.share_with.some((s) => s.name === username))
-
-   el.incomes = el.incomes.filter((e) => {
-    if (e.share_with.length) {
-     return { ...e }
-    }
-   }).filter((f) => f.share_with.some((s) => s.name === username))
-  })
-
-  return res.json(sharedBudgets)
 
  }
  catch (e) {
@@ -102,6 +69,113 @@ export const removeBudget = async (req, res) => {
  }
 }
 
+
+const getSet = (arr, data, key)=>{
+ const set = new Set(arr.reduce((acc, el) => {
+  el[data].forEach((e) => {
+      acc.push(e[key])
+  })
+  return acc
+ }, []))
+ return set
+}
+
+
+export const getMyBudgets = async (req, res) => {
+ try {
+  const user = await UserSchema.findById(req.userId)
+  const username = user.nickname
+  const budgets = await BudgetSchema.find({ creator: username })
+  const users = await BudgetSchema.find({}, "creator")
+
+  const set = new Set(users.map((el) => el.creator))
+  const usersArr = [...set]
+  const expenses = [...getSet(budgets, "expenses", "category")]
+  const incomes = [...getSet(budgets, "incomes", "category")]
+
+  return res.json({
+   data: budgets,
+   users: usersArr,
+   iShareTo: [...getSet(budgets, 'share_with', "name")],
+   categories: {
+   expenses, incomes
+   }
+  })
+ }
+ catch (err) {
+  res.status(404).json({
+   message: 'Could find budgets',
+  })
+ }
+}
+
+
+export const filterMyBudgets = async (req, res) => {
+ try {
+  const expenses = req.body.expenses 
+  const incomes = req.body.incomes
+  const users = req.body.users
+  const creatorKey = users && "creator"
+  const expensesKey = expenses && "expenses"
+  const incomesKey = incomes && "incomes"
+
+  const budgets = await BudgetSchema.find(
+   {
+    [creatorKey]: { $in: users },
+    [expensesKey]: {
+    $elemMatch:{ category: { $in: expenses} }
+    },
+    [incomesKey]: {
+     $elemMatch:{ category: { $in: incomes } }
+      }
+    
+   })
+
+  return res.json({data: budgets})
+ }
+ catch (e) {
+  res.status(404).json({
+   message: 'Could find budgets',
+  })
+ }
+}
+export const getShared = async (req, res) => {
+ try {
+  const user = await UserSchema.findById(req.userId)
+  const username = user.nickname
+  const sharedBudgets = await BudgetSchema.find({
+   "share_with": {
+    $elemMatch: {
+     name: username
+    }
+   }
+  }
+  )
+
+  sharedBudgets.forEach((el) => {
+   el.expenses = el.expenses.filter((e) => {
+    if (e.share_with.length) {
+     return { ...e }
+    }
+   }).filter((f) => f.share_with.some((s) => s.name === username))
+
+   el.incomes = el.incomes.filter((e) => {
+    if (e.share_with.length) {
+     return { ...e }
+    }
+   }).filter((f) => f.share_with.some((s) => s.name === username))
+  })
+
+  const set = new Set(sharedBudgets.map((el)=>el.creator))
+
+  return res.json({data: sharedBudgets, sharedToMe:[...set]})
+
+ }
+ catch (e) {
+  res.json({ e })
+ }
+}
+
 export const updateBudget = async (req, res) => {
  try {
   const errors = validationResult(req)
@@ -126,5 +200,45 @@ export const updateBudget = async (req, res) => {
   res.status(500).json({
    message: 'Could not update budget info',
   });
+ }
+}
+
+export const getFriendBudgets = async (req, res) => {
+ 
+ try {
+  
+  const user = await UserSchema.findById(req.userId)
+  const username = user.nickname
+
+  const budgets = await BudgetSchema.find({
+   creator: req.body.creator,
+   "share_with": {
+    $elemMatch: {
+     name: username
+    }
+   }
+  })
+
+  budgets.forEach((el) => {
+  
+   el.expenses = el.expenses.filter((e) => {
+    if (e.share_with.length) {
+     return { ...e }
+    }
+   }).filter((f) => f.share_with.some((s) => s.name === username))
+
+   el.incomes = el.incomes.filter((e) => {
+    if (e.share_with.length) {
+     return { ...e }
+    }
+   }).filter((f) => f.share_with.some((s) => s.name === username))
+  })
+
+  return res.json({data: budgets})
+ }
+ catch (e) {
+  res.status(404).json({
+   message: 'Could not find budgets',
+  })
  }
 }

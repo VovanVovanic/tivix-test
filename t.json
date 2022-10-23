@@ -1,0 +1,56 @@
+{
+ "title": "vladimir budget updated",
+ "creator": "vladimir",
+ "description": "",
+ "share_with": [
+  {
+   "name": "mr brown"
+  },
+  {
+   "name": "deineris"
+  }
+ ],
+ "expenses": [
+  
+
+  {
+   "category": "bills",
+   "share_with": [ 
+    {
+     "name": "mr brown"
+    },
+    {
+     "name": "deineris"
+    }
+],
+   "amount": 2730
+  },
+  {
+   "category": "taxes",
+   "share_with": [
+   ],
+   "amount": 0
+  }
+ ],
+ "incomes": [
+  {
+   "category": "job",
+   "share_with": [
+    {
+     "name": "mr brown"
+    },
+    {
+     "name": "deineris"
+    }
+   ],
+   "amount": 1300
+  },
+  
+  {
+   "category": "freelance",
+   "share_with": [
+   ],
+   "amount": 240
+  }
+ ]
+}

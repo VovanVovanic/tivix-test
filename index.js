@@ -21,18 +21,25 @@ async function start() {
       }
     ).then(() => console.log("success"))
 
-    ///user
+    ///users
     app.post('/user/register', registerValidation, user.register)
     app.post('/user/login', loginValidation, user.login)
     app.get('/user/me', checkAuth, user.getMe);
     app.put('/user/edit', checkAuth, registerValidation, user.edit)
     app.delete('/user/remove', checkAuth, user.remove)
 
-    ///budget
+    ///budgets
     app.post('/budgets/create_budget', checkAuth, budgetValidation, budget.createBudget);
     app.get('/budgets/get_shared_with_me', checkAuth, budget.getShared);
     app.delete('/budgets/remove/:id', checkAuth, budget.removeBudget);
     app.put('/budgets/edit/:id', checkAuth, budgetValidation, budget.updateBudget)
+    app.get('/budgets/my_budgets', checkAuth, budget.getMyBudgets)
+    app.get('/budgets/my_budgets_filtered', checkAuth, budget.filterMyBudgets)
+    app.get('/budgets/friend_budget', checkAuth, budget.getFriendBudgets)
+    
+
+    ///paging
+
 
     app.listen(PORT, () => {
       console.log("server started")

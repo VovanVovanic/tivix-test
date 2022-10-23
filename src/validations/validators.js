@@ -17,7 +17,6 @@ export const loginValidation = [
 export const budgetValidation = [
  body('title', "required field").not().isEmpty().trim().escape(),
  body('title', "Minimum title length is 2").isLength({ min: 2 }),
- body('creator', "required field").not().isEmpty().trim().escape(),
  body('expenses', "at least one option must be chosen").not().isEmpty(),
  body('incomes', "at least one option must be chosen").not().isEmpty(),
 ]
