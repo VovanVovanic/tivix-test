@@ -1,9 +1,14 @@
 import UserSchema from '../schemas/User.js'
 import BudgetSchema from '../schemas/Budget.js'
+import { validationResult } from 'express-validator'
 
 
 export const createBudget = async (req, res) => {
  try {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+   return res.status(400).json(errors.array())
+  }
   const user = await UserSchema.findById(req.userId)
   const { title, share_with, description, expenses, incomes } = req.body
 
@@ -73,7 +78,6 @@ export const removeBudget = async (req, res) => {
    },
    (err, doc) => {
     if (err) {
-     console.log(err);
      return res.status(500).json({
       message: 'Could not delete the budget',
      });
@@ -94,6 +98,33 @@ export const removeBudget = async (req, res) => {
   console.log(err);
   res.status(500).json({
    message: 'Could not get budgets',
+  });
+ }
+}
+
+export const updateBudget = async (req, res) => {
+ try {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json(errors.array())
+  }
+
+  const Id = req.params.id.slice(1);
+  await BudgetSchema.updateOne(
+   {
+    _id: Id,
+   },
+   {
+    ...req.body
+   },
+  );
+  res.json({
+   success: true,
+  });
+ } catch (err) {
+  console.log(err);
+  res.status(500).json({
+   message: 'Could not update budget info',
   });
  }
 }
