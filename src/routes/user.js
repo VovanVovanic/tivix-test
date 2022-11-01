@@ -81,9 +81,11 @@ export const getMe = async (req, res) => {
   }
   const token = jwt.sign({
    _id: user._id
- }, 'secret123', { expiresIn: '30d' })
+  }, 'secret123', { expiresIn: '7d' })
+   
+  
 
-   const { passwordHash, ...userData } = user._doc;
+   const { password, ...userData } = user._doc;
 
    return res.json({...userData, token});
  } catch (err) {
@@ -114,9 +116,19 @@ export const edit = async (req, res) => {
        password: passwordHash,
      },
    );
+   const user = await UserSchema.findById(req.userId);
+   const token = jwt.sign({
+    _id: user._id
+  }, 'secret123', { expiresIn: '7d' })
+
+  const { password, ...data } = user._doc
 
    res.json({
      success: true,
+     ...data,
+     token,
+     expiresIn: new Date(new Date().setDate(new Date().getDate() + 7))
+     
    });
  } catch (err) {
    console.log(err);
