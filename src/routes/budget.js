@@ -91,12 +91,13 @@ export const getMyBudgets = async (req, res) => {
   else {
    page = 1
   }
-  const limit = 2;
+  const limit = 1;
   const skip = (page - 1) * limit;
 
-  const total = await BudgetSchema.countDocuments({})
+  
   
   const user = await UserSchema.findById(req.userId)
+  const total = user.budgets.length
   const username = user.nickname
   const budgets = await BudgetSchema.find({ creator: username }).skip(skip).limit(limit)
   const users = await BudgetSchema.find({}, "creator")
