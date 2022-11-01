@@ -22,12 +22,13 @@ export const register = async (req, res) => {
 
    const token = jwt.sign({
      _id: user._id
-   }, 'secret123', { expiresIn: '30d' })
+   }, 'secret123', { expiresIn: '7d' })
 
    const { password, ...data } = user._doc
    return res.json({
      ...data,
-     token
+     token,
+     expiresIn: new Date(new Date().setDate(new Date().getDate() + 7))
    })
  }
  catch (e) {
@@ -36,6 +37,7 @@ export const register = async (req, res) => {
 }
 
 export const login = async (req, res) => {
+
  try {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
@@ -54,12 +56,13 @@ export const login = async (req, res) => {
 
    const token = jwt.sign({
      _id: user._id
-   }, 'secret123', { expiresIn: '30d' })
+   }, 'secret123', { expiresIn: '7d' })
 
    const { password, ...data } = user._doc
    return res.json({
      ...data,
-     token
+     token,
+     expiresIn: new Date(new Date().setDate(new Date().getDate() + 7))
    })
 
  } catch (e) {
@@ -68,7 +71,6 @@ export const login = async (req, res) => {
 }
 
 export const getMe = async (req, res) => {
- 
  try {
    const user = await UserSchema.findById(req.userId);
   

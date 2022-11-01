@@ -106,7 +106,7 @@ export const getMyBudgets = async (req, res) => {
   const expenses = [...getSet(budgets, "expenses", "category")]
   const incomes = [...getSet(budgets, "incomes", "category")]
 
-  return res.json({
+  return res.status(200).json({
    data: budgets,
    users: usersArr,
    iShareTo: [...getSet(budgets, 'share_with', "name")],
