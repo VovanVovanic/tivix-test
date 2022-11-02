@@ -94,8 +94,6 @@ export const getMyBudgets = async (req, res) => {
   const limit = 1;
   const skip = (page - 1) * limit;
 
-  
-  
   const user = await UserSchema.findById(req.userId)
   const total = user.budgets.length
   const username = user.nickname
@@ -114,7 +112,8 @@ export const getMyBudgets = async (req, res) => {
    categories: {
    expenses, incomes
    },
-   total
+  total,
+   page
   })
  }
  catch (err) {
@@ -135,7 +134,7 @@ export const filterMyBudgets = async (req, res) => {
   else {
    page = 1
   }
-  const limit = 2;
+  const limit = 1;
   const skip = (page - 1) * limit
 
   const expenses = req.body.expenses 
